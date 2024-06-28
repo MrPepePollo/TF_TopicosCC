@@ -73,7 +73,6 @@ public class WorldGUI extends Agent {
 
                     PokemonInfo attackerInfo = pokemones.get(pokemonName);
                     if (attackerInfo != null) {
-                        // Check for collisions
                         for (Map.Entry<String, PokemonInfo> entry : pokemones.entrySet()) {
                             if (!entry.getKey().equals(pokemonName) && entry.getValue().posicion.equals(new Point(x, y))) {
                                 // Battle
@@ -99,7 +98,6 @@ public class WorldGUI extends Agent {
                                 loseMsg.setContent("lose");
                                 send(loseMsg);
 
-                                // Remove the loser from the GUI
                                 pokemones.remove(perdedorName);
                                 worldPanel.removePokemon(perdedorName);
                                 break;

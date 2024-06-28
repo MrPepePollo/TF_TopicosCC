@@ -16,7 +16,6 @@ public class PokemonAgent extends Agent {
     private static final Map<String, Map<String, Double>> probabilidades = new HashMap<>();
 
     static {
-        // Inicializa la tabla de probabilidades
         Map<String, Double> fuegoProb = new HashMap<>();
         fuegoProb.put("fuego", 0.5);
         fuegoProb.put("agua", 0.2);
@@ -54,7 +53,6 @@ public class PokemonAgent extends Agent {
             tipo = (String) args[0];
             posicion = new Point((int) args[1], (int) args[2]);
         } else {
-            // Si los argumentos no son válidos, terminar el agente
             System.out.println("Argumentos inválidos para el agente Pokémon.");
             doDelete();
             return;
@@ -80,8 +78,8 @@ public class PokemonAgent extends Agent {
         @Override
         protected void onTick() {
             if (posicion != null && tipo != null) {
-                int dx = random.nextInt(3) - 1; // Move -1, 0, or 1 in x direction
-                int dy = random.nextInt(3) - 1; // Move -1, 0, or 1 in y direction
+                int dx = random.nextInt(3) - 1;
+                int dy = random.nextInt(3) - 1;
                 posicion.translate(dx, dy);
                 // Ensure the position stays within bounds
                 posicion.x = Math.max(0, Math.min(99, posicion.x));
