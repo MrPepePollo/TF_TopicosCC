@@ -262,5 +262,8 @@ El proyecto logró desarrollar un sistema multiagentes funcional que simula con 
 
 [**https://github.com/MrPepePollo/TF_TopicosCC**](https://github.com/MrPepePollo/TF_TopicosCC)
 
+**Video de funcionamiento del código:**
+[**https://www.youtube.com/watch?v=bl8zZ1wM4Lg**](https://www.youtube.com/watch?v=bl8zZ1wM4Lg)
+
 
 
