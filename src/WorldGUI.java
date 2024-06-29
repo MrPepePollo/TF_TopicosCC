@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +28,7 @@ public class WorldGUI extends Agent {
 
         JFrame frame = new JFrame("Mundo Pokémon");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 700);
+        frame.setSize(1250, 1250);
         frame.add(worldPanel);
         frame.setVisible(true);
 
@@ -42,13 +43,16 @@ public class WorldGUI extends Agent {
             if (msg != null) {
                 String[] content = msg.getContent().split(",");
                 if (content.length == 3) {
-                    // Positional update
                     try {
                         int x = Integer.parseInt(content[0]);
                         int y = Integer.parseInt(content[1]);
                         String tipo = content[2];
-                        BufferedImage image = worldPanel.getRandomImageForType(tipo);
-                        pokemones.put(msg.getSender().getLocalName(), new PokemonInfo(new Point(x, y), tipo, image));
+                        if (!pokemones.containsKey(msg.getSender().getLocalName())) {
+                            BufferedImage image = worldPanel.getRandomImageForType(tipo);
+                            pokemones.put(msg.getSender().getLocalName(), new PokemonInfo(new Point(x, y), tipo, image));
+                        } else {
+                            pokemones.get(msg.getSender().getLocalName()).setPosicion(new Point(x, y));
+                        }
                         worldPanel.updatePokemonPosition(msg.getSender().getLocalName(), x, y, tipo);
                     } catch (NumberFormatException e) {
                         System.out.println("Error parsing position: " + e.getMessage());
@@ -75,7 +79,6 @@ public class WorldGUI extends Agent {
                     if (attackerInfo != null) {
                         for (Map.Entry<String, PokemonInfo> entry : pokemones.entrySet()) {
                             if (!entry.getKey().equals(pokemonName) && entry.getValue().posicion.equals(new Point(x, y))) {
-                                // Battle
                                 String otroPokemonName = entry.getKey();
                                 String otroTipo = entry.getValue().tipo;
                                 ACLMessage battleResult = new ACLMessage(ACLMessage.INFORM);
@@ -88,11 +91,9 @@ public class WorldGUI extends Agent {
                                 resultMsg.setContent("battle_result," + otroPokemonName);
                                 send(resultMsg);
 
-                                // Determine winner and loser
                                 boolean ganadorEsPokemon = pokemones.get(pokemonName).tipo.equals(otroTipo) || Math.random() < 0.5;
                                 String perdedorName = ganadorEsPokemon ? otroPokemonName : pokemonName;
 
-                                // Inform the loser that it has lost
                                 ACLMessage loseMsg = new ACLMessage(ACLMessage.INFORM);
                                 loseMsg.addReceiver(new AID(perdedorName, AID.ISLOCALNAME));
                                 loseMsg.setContent("lose");
@@ -119,12 +120,14 @@ public class WorldGUI extends Agent {
         private Map<String, PokemonInfo> pokemones;
         private Map<String, List<BufferedImage>> pokemonImages;
         private Random random;
+        private BufferedImage backgroundImage;
 
         public WorldPanel() {
             pokemones = new ConcurrentHashMap<>();
             pokemonImages = new ConcurrentHashMap<>();
             random = new Random();
             loadImages();
+            loadBackgroundImage();
         }
 
         private void loadImages() {
@@ -132,6 +135,20 @@ public class WorldGUI extends Agent {
             loadImagesForType("agua", "img_pokemones/agua.png", "img_pokemones/agua2.png", "img_pokemones/agua3.png");
             loadImagesForType("electric", "img_pokemones/electric.png", "img_pokemones/electric2.png", "img_pokemones/electric3.png");
             loadImagesForType("planta", "img_pokemones/planta.png", "img_pokemones/planta2.png", "img_pokemones/planta3.png");
+            loadImagesForType("normal", "img_pokemones/normal.png", "img_pokemones/normal2.png", "img_pokemones/normal3.png");
+            loadImagesForType("roca", "img_pokemones/roca.png", "img_pokemones/roca2.png", "img_pokemones/roca3.png");
+            loadImagesForType("psiquico", "img_pokemones/psiquico.png", "img_pokemones/psiquico2.png", "img_pokemones/psiquico3.png");
+            loadImagesForType("ghost", "img_pokemones/ghost.png", "img_pokemones/ghost2.png", "img_pokemones/ghost3.png");
+            loadImagesForType("lucha", "img_pokemones/lucha.png", "img_pokemones/lucha2.png", "img_pokemones/lucha3.png");
+            loadImagesForType("bicho", "img_pokemones/bicho.png", "img_pokemones/bicho2.png", "img_pokemones/bicho3.png");
+        }
+
+        private void loadBackgroundImage() {
+            try {
+                backgroundImage = ImageIO.read(new File("img_pokemones/background.jpg"));
+            } catch (IOException e) {
+                System.out.println("Error loading background image: " + e.getMessage());
+            }
         }
 
         private void loadImagesForType(String tipo, String... filenames) {
@@ -141,7 +158,7 @@ public class WorldGUI extends Agent {
                     File file = new File(filename);
                     if (file.exists()) {
                         BufferedImage originalImage = ImageIO.read(file);
-                        BufferedImage resizedImage = ImageUtils.resizeImage(originalImage, 40, 40);
+                        BufferedImage resizedImage = ImageUtils.resizeImage(originalImage, 65, 65);
                         images.add(resizedImage);
                     } else {
                         System.out.println("File not found: " + file.getAbsolutePath());
@@ -154,8 +171,12 @@ public class WorldGUI extends Agent {
         }
 
         public void updatePokemonPosition(String name, int x, int y, String tipo) {
-            BufferedImage image = getRandomImageForType(tipo);
-            pokemones.put(name, new PokemonInfo(new Point(x, y), tipo, image));
+            if (!pokemones.containsKey(name)) {
+                BufferedImage image = getRandomImageForType(tipo);
+                pokemones.put(name, new PokemonInfo(new Point(x, y), tipo, image));
+            } else {
+                pokemones.get(name).setPosicion(new Point(x, y));
+            }
             repaint();
         }
 
@@ -167,6 +188,9 @@ public class WorldGUI extends Agent {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), null);
+            }
             int panelWidth = getWidth();
             int panelHeight = getHeight();
             double scaleX = panelWidth / 100.0;
@@ -180,8 +204,32 @@ public class WorldGUI extends Agent {
                     g.drawImage(image, adjustedX, adjustedY, null);
                 }
             }
+            drawPokemonCount(g);
+        }
+
+        private void drawPokemonCount(Graphics g) {
+            Map<String, Integer> typeCounts = new HashMap<>();
+            for (PokemonInfo p : pokemones.values()) {
+                typeCounts.put(p.getTipo(), typeCounts.getOrDefault(p.getTipo(), 0) + 1);
+            }
+
+            int yPosition = 20;
+            int rectHeight = typeCounts.size() * 20 + 40;
+            int rectWidth = 300;
+
+            g.setColor(new Color(128, 128, 128, 180));
+            g.fillRect(5, 5, rectWidth, rectHeight);
+
+            g.setFont(new Font("Arial", Font.BOLD, 18));
             g.setColor(Color.BLACK);
-            g.drawString("Pokémon restantes: " + pokemones.size(), 10, 20);
+            for (Map.Entry<String, Integer> entry : typeCounts.entrySet()) {
+                g.drawString(entry.getKey() + ": " + entry.getValue(), 10, yPosition);
+                yPosition += 20;
+            }
+
+            g.setFont(new Font("Arial", Font.BOLD, 24));
+            g.setColor(Color.RED);
+            g.drawString("Total de Pokemones: " + pokemones.size(), 10, yPosition + 20);
         }
 
         private BufferedImage getRandomImageForType(String tipo) {
@@ -194,15 +242,32 @@ public class WorldGUI extends Agent {
     }
 
     class PokemonInfo {
-        Point posicion;
-        String tipo;
-        BufferedImage imagen;
+        private Point posicion;
+        private String tipo;
+        private BufferedImage imagen;
 
         public PokemonInfo(Point posicion, String tipo, BufferedImage imagen) {
             this.posicion = posicion;
             this.tipo = tipo;
             this.imagen = imagen;
         }
+
+        public Point getPosicion() {
+            return posicion;
+        }
+
+        public void setPosicion(Point posicion) {
+            this.posicion = posicion;
+        }
+
+        public String getTipo() {
+            return tipo;
+        }
+
+        public BufferedImage getImagen() {
+            return imagen;
+        }
     }
 }
+
 

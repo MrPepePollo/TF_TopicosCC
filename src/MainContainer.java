@@ -6,12 +6,16 @@ import jade.wrapper.ContainerController;
 
 public class MainContainer {
     private static final int TAMANO_MUNDO = 100;
-    private static final int NUM_POKEMONES = 4000;
+    private static final int NUM_POKEMONES = 3000;
 
     public static void main(String[] args) {
         Runtime rt = Runtime.instance();
         Profile p = new ProfileImpl();
+        p.setParameter(Profile.GUI, "true");
         ContainerController cc = rt.createMainContainer(p);
+
+        AudioPlayer audioPlayer = new AudioPlayer();
+        audioPlayer.play("music_pokemon/music.wav");
 
         try {
             for (int i = 0; i < NUM_POKEMONES; i++) {
@@ -36,7 +40,7 @@ public class MainContainer {
     }
 
     private static String getRandomTipo() {
-        String[] tipos = {"fuego", "agua", "electric", "planta"};
+        String[] tipos = {"fuego", "agua", "electric", "planta", "normal", "ghost", "psiquico","roca","lucha","bicho"};
         return tipos[(int) (Math.random() * tipos.length)];
     }
 }
