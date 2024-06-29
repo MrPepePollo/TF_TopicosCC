@@ -6,7 +6,7 @@ import jade.wrapper.ContainerController;
 
 public class MainContainer {
     private static final int TAMANO_MUNDO = 100;
-    private static final int NUM_POKEMONES = 3000;
+    private static final int NUM_POKEMONES = 4000;
 
     public static void main(String[] args) {
         Runtime rt = Runtime.instance();

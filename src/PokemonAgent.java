@@ -41,8 +41,8 @@ public class PokemonAgent extends Agent {
         probabilidades.put("agua", aguaProb);
 
         Map<String, Double> electricProb = new HashMap<>();
-        electricProb.put("fuego", 0.6);
-        electricProb.put("agua", 0.7);
+        electricProb.put("fuego", 0.3);
+        electricProb.put("agua", 0.8);
         electricProb.put("electric", 0.5);
         electricProb.put("planta", 0.6);
         electricProb.put("roca", 0.6);
